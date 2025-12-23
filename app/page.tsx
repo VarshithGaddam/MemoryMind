@@ -21,12 +21,24 @@ export default function Home() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ messages })
       });
+      
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to extract memory');
+      }
+      
       const data = await res.json();
+      
+      // Validate the response structure
+      if (!data.preferences || !data.emotionalPatterns || !data.facts) {
+        throw new Error('Invalid response structure from API');
+      }
+      
       setMemory(data);
       setStep('memory');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error:', error);
-      alert('Failed to extract memory');
+      alert(`Failed to extract memory: ${error.message}`);
     }
     setLoading(false);
   };
@@ -115,7 +127,7 @@ export default function Home() {
               <div className="bg-blue-50 rounded p-4">
                 <h3 className="font-semibold text-blue-900 mb-2">Preferences</h3>
                 <ul className="text-sm space-y-1">
-                  {memory.preferences.map((p, idx) => (
+                  {(memory.preferences || []).map((p, idx) => (
                     <li key={idx} className="text-gray-700">
                       • {p.preference}
                     </li>
@@ -126,7 +138,7 @@ export default function Home() {
               <div className="bg-purple-50 rounded p-4">
                 <h3 className="font-semibold text-purple-900 mb-2">Emotional Patterns</h3>
                 <ul className="text-sm space-y-1">
-                  {memory.emotionalPatterns.map((e, idx) => (
+                  {(memory.emotionalPatterns || []).map((e, idx) => (
                     <li key={idx} className="text-gray-700">
                       • {e.emotion}: {e.context}
                     </li>
@@ -137,7 +149,7 @@ export default function Home() {
               <div className="bg-green-50 rounded p-4">
                 <h3 className="font-semibold text-green-900 mb-2">Key Facts</h3>
                 <ul className="text-sm space-y-1">
-                  {memory.facts.map((f, idx) => (
+                  {(memory.facts || []).map((f, idx) => (
                     <li key={idx} className="text-gray-700">
                       • {f.fact}
                     </li>
