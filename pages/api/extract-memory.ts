@@ -14,9 +14,11 @@ export default async function handler(
     const apiKey = process.env.OPENAI_API_KEY;
 
     if (!apiKey) {
-      return res.status(500).json({ error: 'OpenRouter API key not configured' });
+      console.error('API key not found in environment variables');
+      return res.status(500).json({ error: 'OpenRouter API key not configured. Please add OPENAI_API_KEY to environment variables.' });
     }
 
+    console.log('API key found, extracting memory...');
     const extractor = new MemoryExtractor(apiKey);
     const memory = await extractor.extractMemory(messages);
 
